@@ -1,16 +1,13 @@
-import { Products } from ">> @/types/products";
 
-export const getWishlistItems = () => {
-    console.log("Fetching wishlist items");
-}
-export const moveAllToCart = () => {
-    console.log("All items moved to cart");
-}
+import React from 'react';
+import Bags from '../components/Card';
+import { Cardo } from 'next/font/google';
 
-export const addToCart = (product?: Products) => {
-  console.log("Items added to cart")
+const Card = ()=>{
+    return(
+     <div>
+         <Card />
+     </div>
+    )
 }
-
-export const removeFromWishlist = (productId?: string) => {
-    console.log("Item removed from cart")
-}
+export default Card;
