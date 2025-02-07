@@ -1,0 +1,36 @@
+{
+  "components": [
+    {
+      "name": "Header",
+      "description": "A responsive header/navigation bar for the application.",
+      "path": "components/Header.tsx",
+      "props": {
+        "title": "string",
+        "links": "array"
+      },
+      "tags": ["navigation", "layout", "responsive"]
+    },
+    {
+      "name": "Sheet",
+      "description": "A slide-in panel component for modals or sidebars.",
+      "path": "components/Sheet.tsx",
+      "props": {
+        "isOpen": "boolean",
+        "onClose": "function",
+        "children": "ReactNode",
+        "position": "string"
+      },
+      "tags": ["ui", "modal", "overlay"]
+    },
+    {
+      "name": "Footer",
+      "description": "A customizable footer component for displaying links and branding.",
+      "path": "components/Footer.tsx",
+      "props": {
+        "links": "array",
+        "copyright": "string"
+      },
+      "tags": ["layout", "footer"]
+    }
+  ]
+}
