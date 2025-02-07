@@ -1,107 +1,93 @@
-import Image from "next/image";
-import React from "react";
 
-const Card = () => {
+import { client } from '>> @/sanity/lib/client'; // Adjust import based on your file structure
+import Image from 'next/image';
+import { Products } from '>> @/types/products';
+
+interface ProductPageProps {
+  product: Products | null;
+}
+
+export async function getProductData(productId: string): Promise<Products | null> {
+  // Query to fetch the product details using the ID
+  const productQuery = `
+    *[_type == "product" && _id == "${productId}"]{
+    _id,
+      ProductName,
+      description,
+      price,
+      status,
+      inventory,
+      category,
+      colors,
+      "imageUrl": image.asset->url
+    }
+  `;
+  
+  const productData = await client.fetch(productQuery);
+
+  if (!productData || productData.length === 0) {
+    return null; // Return null if the product is not found
+  }
+
+  return productData[0]; // Return the product data
+}
+
+const ProductPage = async ({ params }: { params: { id: string } }) => {
+  const { id } = params;
+
+  // Fetch product data for the specific product
+  const product = await getProductData(id);
+
+  if (!product) {
+    return <div>Product not found</div>; // Handle case where product data is null or not found
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Bag Section */}
-        <div className="md:col-span-2">
-          {/* Free Delivery Info */}
-          <div className="bg-gray-100 p-4 rounded-md text-sm text-gray-600 mb-6">
-            Free Delivery on orders of ₹14,000.00 or more.{" "}
-            <span className="text-black font-medium underline cursor-pointer">
-              View details
-            </span>
-          </div>
-
-          {/* Items in Bag */}
-          <div className="space-y-6">
-            {/* Item 1 */}
-            <div className="flex items-start bg-white p-4 rounded-lg shadow-md">
-              <Image width={200} height={200}
-                src="/gr4.png"
-                alt="Item 1"
-                className="w-24 h-24 object-cover rounded-md"
-              />
-              <div className="flex-grow ml-4">
-                <h3 className="text-lg font-medium">
-                  Nike Dri-FIT ADV TechKnit Ultra
-                </h3>
-                <p className="text-gray-500 text-sm">
-                  Mens Short-Sleeve Running Top <br />
-                  Ashen Slate/Cobalt Bliss <br />
-                  Size: L Quantity: 1
-                </p>
-                <div className="flex items-center space-x-4 mt-2 text-gray-500">
-                  <button>
-                    <i className="fa fa-heart"></i>
-                  </button>
-                  <button>
-                    <i className="fa fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-              <p className="text-right font-medium">MRP: ₹3,895.00</p>
-            </div>
-
-            {/* Item 2 */}
-            <div className="flex items-start bg-white p-4 rounded-lg shadow-md">
-              <Image width={200} height={200}
-                src="/gear-m-1.png"
-                alt="Item 2"
-                className="w-24 h-24 object-cover rounded-md"
-              />
-              
-              
-              <div className="flex-grow ml-4">
-                <h3 className="text-lg font-medium">Nike Air Max 97 SE</h3>
-                <p className="text-gray-500 text-sm">
-                  Mens Shoes <br />
-                  Flat Pewter/Light Bone/Black/White <br />
-                  Size: L Quantity: 1
-                </p>
-                <div className="flex items-center space-x-4 mt-2 text-gray-500">
-                  <button>
-                    <i className="fa fa-heart"></i>
-                  </button>
-                  <button>
-                    <i className="fa fa-trash"></i>
-                  </button>
-                </div>
-              </div>
-              <p className="text-right font-medium">MRP: ₹16,995.00</p>
-            </div>
-          </div>
-
-          {/* Favorites Section */}
-          <div className="mt-8 text-gray-500 text-center">
-            <p>Favourites</p>
-            <p className="text-sm">There are no items saved to your favourites.</p>
-          </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Product Image */}
+        <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100">
+          {product.imageUrl && (
+            <Image
+              src={product.imageUrl}
+              alt="image"
+              width={800}
+              height={800}
+              className="object-cover"
+            />
+          )}
         </div>
 
-        {/* Summary Section */}
-        <div>
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-medium mb-4">Summary</h3>
-            <div className="space-y-4 text-sm text-gray-600">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>₹20,890.00</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Estimated Delivery & Handling</span>
-                <span>Free</span>
-              </div>
-              <div className="flex justify-between font-medium text-black">
-                <span>Total</span>
-                <span>₹20,890.00</span>
-              </div>
+        {/* Product Details */}
+        <div className="flex flex-col gap-8">
+          <h1 className="text-4xl font-bold">{product.ProductName}</h1>
+
+          {/* Price */}
+          <div className="flex items-center gap-4">
+            <span className="text-3xl font-bold text-red-600">${product.price}</span>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <span className="text-xl text-gray-500 line-through">${product.originalPrice}</span>
+            )}
+          </div>
+
+          {/* Description */}
+          <p className="text-lg text-gray-700">{product.description}</p>
+
+          {/* Add to Cart Button */}
+          <button className="mt-4 py-3 px-6 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+            Add to Cart
+          </button>
+
+          {/* Additional Info (if any) */}
+          <div className="border-t border-gray-200 pt-6 space-y-4">
+            <div className="flex items-center gap-3 text-lg text-gray-700">
+              <span className="w-6 h-6 text-green-500">🚚</span>
+              <span>Free shipping on orders over $50</span>
             </div>
-            <button className="w-full mt-6 bg-black text-white py-2 rounded-lg hover:bg-gray-800">
-              Member Checkout
-            </button>
+            <div className="flex items-center gap-3 text-lg text-gray-700">
+              <span className="w-6 h-6 text-green-500">🔁</span>
+              <span>30-day hassle-free return policy</span>
+            </div>
           </div>
         </div>
       </div>
@@ -109,4 +95,4 @@ const Card = () => {
   );
 };
 
-export default Card;
+export default ProductPage;
